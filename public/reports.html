@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Loan Management - Reports</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .report-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .report-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .report-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+
+        .report-card p {
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .date-controls {
+            background: #f1f3f4;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .date-controls h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .date-form {
+            display: flex;
+            gap: 20px;
+            align-items: end;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            display: none;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .auth-section {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .auth-section h4 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+
+        .auth-section input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .date-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Reports Dashboard</h1>
+            <p>Generate comprehensive reports for your Daily Loan Management System</p>
+        </div>
+
+        <div class="content">
+            <!-- Authentication Section -->
+            <div class="auth-section">
+                <h4>🔐 Authentication Required</h4>
+                <input type="password" id="authToken" placeholder="Enter your JWT token here..." />
+                <p style="color: #856404; font-size: 0.9rem; margin-top: 10px;">
+                    Note: You need to authenticate first to access the reports. Get your token from the login API.
+                </p>
+            </div>
+
+            <!-- Date Controls -->
+            <div class="date-controls">
+                <h3>📅 Select Date Range</h3>
+                <div class="date-form">
+                    <div class="form-group">
+                        <label for="startDate">Start Date:</label>
+                        <input type="date" id="startDate" />
+                    </div>
+                    <div class="form-group">
+                        <label for="endDate">End Date:</label>
+                        <input type="date" id="endDate" />
+                    </div>
+                    <button class="btn btn-primary" onclick="setDefaultDates()">
+                        Set Last 30 Days
+                    </button>
+                </div>
+            </div>
+
+            <!-- Messages -->
+            <div id="loading" class="loading">
+                <p>🔄 Generating report... Please wait.</p>
+            </div>
+            <div id="error" class="error"></div>
+            <div id="success" class="success"></div>
+
+            <!-- Reports Grid -->
+            <div class="reports-grid">
+                <!-- Business Report -->
+                <div class="report-card">
+                    <h3>📈 Business Report</h3>
+                    <p>Comprehensive overview of your business performance including customer statistics, loan metrics,
+                        financial summaries, and top customer analysis.</p>
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="generateReport('business-report', 'json')">
+                            View Data
+                        </button>
+                        <button class="btn btn-secondary" onclick="generateReport('business-report', 'pdf')">
+                            📄 Download PDF
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Customer Report -->
+                <div class="report-card">
+                    <h3>👥 Customer Report</h3>
+                    <p>Detailed analysis of customer growth patterns, status distribution, and customer acquisition
+                        trends over the selected period.</p>
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="generateReport('customer-report', 'json')">
+                            View Data
+                        </button>
+                        <button class="btn btn-secondary" onclick="generateReport('customer-report', 'pdf')">
+                            📄 Download PDF
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Loan Performance Report -->
+                <div class="report-card">
+                    <h3>💰 Loan Performance</h3>
+                    <p>In-depth analysis of loan performance metrics, repayment patterns, and loan portfolio health
+                        indicators.</p>
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="generateReport('loan-performance', 'json')">
+                            View Data
+                        </button>
+                        <button class="btn btn-secondary" onclick="generateReport('loan-performance', 'pdf')">
+                            📄 Download PDF
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Financial Summary -->
+                <div class="report-card">
+                    <h3>📊 Financial Summary</h3>
+                    <p>Complete financial overview including cash flow analysis, profitability metrics, and revenue
+                        breakdown.</p>
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="generateReport('financial-summary', 'json')">
+                            View Data
+                        </button>
+                        <button class="btn btn-secondary" onclick="generateReport('financial-summary', 'pdf')">
+                            📄 Download PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- JSON Data Display -->
+            <div id="jsonDisplay" style="display: none;">
+                <h3 style="color: #2c3e50; margin-bottom: 20px;">📋 Report Data</h3>
+                <pre id="jsonContent"
+                    style="background: #f8f9fa; padding: 20px; border-radius: 10px; overflow-x: auto; font-size: 0.9rem; line-height: 1.4;"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set default dates to last 30 days
+        function setDefaultDates() {
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 30);
+
+            document.getElementById('endDate').value = endDate.toISOString().split('T')[0];
+            document.getElementById('startDate').value = startDate.toISOString().split('T')[0];
+        }
+
+        // Initialize with default dates
+        setDefaultDates();
+
+        // Show/hide elements
+        function showElement(id) {
+            document.getElementById(id).style.display = 'block';
+        }
+
+        function hideElement(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        // Show messages
+        function showError(message) {
+            hideElement('loading');
+            hideElement('success');
+            document.getElementById('error').textContent = message;
+            showElement('error');
+        }
+
+        function showSuccess(message) {
+            hideElement('loading');
+            hideElement('error');
+            document.getElementById('success').textContent = message;
+            showElement('success');
+        }
+
+        function showLoading() {
+            hideElement('error');
+            hideElement('success');
+            showElement('loading');
+        }
+
+        // Generate report
+        async function generateReport(reportType, format) {
+            const token = document.getElementById('authToken').value.trim();
+            if (!token) {
+                showError('Please enter your authentication token first.');
+                return;
+            }
+
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            // Build URL
+            let url = `/api/reports/${reportType}?format=${format}`;
+            if (startDate) url += `&startDate=${startDate}`;
+            if (endDate) url += `&endDate=${endDate}`;
+
+            showLoading();
+            hideElement('jsonDisplay');
+
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                if (format === 'pdf') {
+                    // Handle PDF download
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${reportType}-${new Date().toISOString().split('T')[0]}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+
+                    showSuccess(`${reportType} PDF downloaded successfully!`);
+                } else {
+                    // Handle JSON response
+                    const data = await response.json();
+                    document.getElementById('jsonContent').textContent = JSON.stringify(data, null, 2);
+                    showElement('jsonDisplay');
+                    showSuccess(`${reportType} data loaded successfully!`);
+                }
+
+            } catch (error) {
+                console.error('Error generating report:', error);
+                showError(`Failed to generate ${reportType}: ${error.message}`);
+            }
+        }
+
+        // Handle enter key in auth token field
+        document.getElementById('authToken').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                // You could add token validation here
+                showSuccess('Token set! You can now generate reports.');
+            }
+        });
+    </script>
+</body>
+
+</html>

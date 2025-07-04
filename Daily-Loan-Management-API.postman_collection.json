@@ -1,0 +1,947 @@
+{
+  "info": {
+    "name": "Loan Management API",
+    "description": "Complete API collection for Loan Management System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "API Root",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": ["{{baseUrl}}"],
+              "path": [""]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.user && response.user.userId) {",
+                  "        pm.collectionVariables.set('userId', response.user.userId);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\",\n  \"name\": \"Test User\",\n  \"email\": \"test@example.com\",\n  \"language\": \"en\",\n  \"currency\": \"USD\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.token) {",
+                  "        pm.collectionVariables.set('authToken', response.token);",
+                  "    }",
+                  "    if (response.user && response.user.userId) {",
+                  "        pm.collectionVariables.set('userId', response.user.userId);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get User Preferences Options",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/preferences/options",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "preferences", "options"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Preferences",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"language\": \"en\",\n  \"currency\": \"USD\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}/preferences",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "{{userId}}", "preferences"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "View User Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "{{userId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Edit User Profile",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Updated Test User",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "updated@example.com",
+                  "type": "text"
+                },
+                {
+                  "key": "profileImage",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "{{userId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Customers",
+      "item": [
+        {
+          "name": "Get All Customers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Customer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data._id) {",
+                  "        pm.collectionVariables.set('customerId', response.data._id);",
+                  "    }",
+                  "    if (response.data && response.data.customerId) {",
+                  "        pm.collectionVariables.set('customerIdNumber', response.data.customerId);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"address\": \"123 Main St, City\",\n  \"phone\": \"+1234567890\",\n  \"email\": \"john@example.com\",\n  \"idNumber\": \"ID123456789\",\n  \"occupation\": \"Software Engineer\",\n  \"monthlyIncome\": 5000\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Customer by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/customers/{{customerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers", "{{customerId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Customer by Customer ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/customers/by-customer-id/{{customerIdNumber}}",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "customers",
+                "by-customer-id",
+                "{{customerIdNumber}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Customer",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe Updated\",\n  \"address\": \"456 Updated St, City\",\n  \"phone\": \"+1234567891\",\n  \"email\": \"john.updated@example.com\",\n  \"occupation\": \"Senior Software Engineer\",\n  \"monthlyIncome\": 6000\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/customers/{{customerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers", "{{customerId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Customer",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/customers/{{customerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers", "{{customerId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Customer Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/customers/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers", "stats"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Loans",
+      "item": [
+        {
+          "name": "Get All Loans",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/loans",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loans"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Loan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data._id) {",
+                  "        pm.collectionVariables.set('loanId', response.data._id);",
+                  "    }",
+                  "    if (response.data && response.data.loanId) {",
+                  "        pm.collectionVariables.set('loanIdNumber', response.data.loanId);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{customerId}}\",\n  \"amount\": 10000,\n  \"interestRate\": 12,\n  \"term\": 12,\n  \"startDate\": \"2025-01-01\",\n  \"purpose\": \"Business expansion\",\n  \"collateral\": \"Property documents\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/loans",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loans"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Loan by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/loans/{{loanId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loans", "{{loanId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Loan by Loan ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/loans/by-id/{{loanIdNumber}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loans", "by-id", "{{loanIdNumber}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Loan",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 12000,\n  \"interestRate\": 10,\n  \"purpose\": \"Business expansion - updated\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/loans/{{loanId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loans", "{{loanId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Loan",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/loans/{{loanId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loans", "{{loanId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Loan Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/loans/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loans", "stats"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Overdue Loans",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/loans/overdue",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loans", "overdue"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 1000,\n  \"paymentDate\": \"2025-07-04\",\n  \"paymentMethod\": \"cash\",\n  \"notes\": \"Monthly payment\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/loans/{{loanId}}/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loans", "{{loanId}}", "payments"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Loan Schedule",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/loans/{{loanId}}/schedule",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loans", "{{loanId}}", "schedule"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Loan Installments",
+      "item": [
+        {
+          "name": "Get Loan Installments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/loans/{{loanId}}/installments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loans", "{{loanId}}", "installments"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Installment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"installmentNumber\": 1,\n  \"amount\": 900,\n  \"dueDate\": \"2025-02-01\",\n  \"principal\": 750,\n  \"interest\": 150\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/loans/{{loanId}}/installments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loans", "{{loanId}}", "installments"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Installment",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 950,\n  \"dueDate\": \"2025-02-05\",\n  \"status\": \"pending\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/loans/{{loanId}}/installments/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loans", "{{loanId}}", "installments", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Make Installment Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 900,\n  \"paymentDate\": \"2025-02-01\",\n  \"paymentMethod\": \"bank_transfer\",\n  \"notes\": \"First installment payment\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/loans/{{loanId}}/installments/1/payment",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "loans",
+                "{{loanId}}",
+                "installments",
+                "1",
+                "payment"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Bulk Installment Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"installmentNumbers\": [1, 2, 3],\n  \"paymentDate\": \"2025-02-01\",\n  \"paymentMethod\": \"bank_transfer\",\n  \"notes\": \"Bulk payment for multiple installments\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/loans/{{loanId}}/installments/bulk-payment",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "loans",
+                "{{loanId}}",
+                "installments",
+                "bulk-payment"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Overdue Installments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/loans/installments/overdue",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loans", "installments", "overdue"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Upcoming Installments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/loans/installments/upcoming",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loans", "installments", "upcoming"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Installment Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/loans/installments/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loans", "installments", "stats"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard Overview",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/overview",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "overview"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Recent Activities",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/recent-activities",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "recent-activities"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Financial Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/financial-analytics",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "financial-analytics"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Top Customers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/top-customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "top-customers"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Collection Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/collection-summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "collection-summary"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Generate Business Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/business-report?startDate=2025-01-01&endDate=2025-12-31&format=json",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "business-report"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2025-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2025-12-31"
+                },
+                {
+                  "key": "format",
+                  "value": "json"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Business Report (Alias)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/business?startDate=2025-01-01&endDate=2025-12-31&format=pdf",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "business"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2025-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2025-12-31"
+                },
+                {
+                  "key": "format",
+                  "value": "pdf"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Customer Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/customer-report?startDate=2025-01-01&endDate=2025-12-31&format=json",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "customer-report"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2025-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2025-12-31"
+                },
+                {
+                  "key": "format",
+                  "value": "json"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Customer Report (Alias)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/customer?startDate=2025-01-01&endDate=2025-12-31&format=json",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "customer"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2025-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2025-12-31"
+                },
+                {
+                  "key": "format",
+                  "value": "json"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Loan Performance Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/loan-performance?startDate=2025-01-01&endDate=2025-12-31&format=json",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "loan-performance"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2025-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2025-12-31"
+                },
+                {
+                  "key": "format",
+                  "value": "json"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Financial Summary Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/financial-summary?startDate=2025-01-01&endDate=2025-12-31&format=json",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "financial-summary"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2025-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2025-12-31"
+                },
+                {
+                  "key": "format",
+                  "value": "json"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
