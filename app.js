@@ -43,9 +43,17 @@ const createApp = () => {
       origin: function (origin, callback) {
         // Allow requests with no origin (like mobile apps, curl, Postman)
         if (!origin) return callback(null, true);
+
+        // If CORS_ORIGIN is '*', allow all origins
+        if (config.CORS_ORIGIN.includes("*")) {
+          return callback(null, true);
+        }
+
+        // Check if origin is in allowed list
         if (config.CORS_ORIGIN.includes(origin)) {
           return callback(null, true);
         }
+
         return callback(new Error("Not allowed by CORS"));
       },
       credentials: true,
