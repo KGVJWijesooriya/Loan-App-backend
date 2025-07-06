@@ -232,6 +232,10 @@ const getFinancialAnalytics = asyncHandler(async (req, res) => {
   try {
     const { period = "7d" } = req.query;
 
+    // Get user currency from authenticated user
+    const user = await User.findById(req.user.id).select("currency");
+    const userCurrency = user?.currency || "USD";
+
     // Get date range based on period
     const dateRange = getDateRange(period);
 
@@ -323,6 +327,7 @@ const getFinancialAnalytics = asyncHandler(async (req, res) => {
         riskAnalysis,
         period,
         dateRange,
+        currency: userCurrency,
       },
     });
   } catch (error) {
