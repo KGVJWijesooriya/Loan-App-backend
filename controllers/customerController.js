@@ -2,6 +2,7 @@ const asyncHandler = require("../middleware/asyncHandler");
 const Customer = require("../models/Customer");
 const Loan = require("../models/Loan");
 const Logger = require("../utils/logger");
+const { getUserCurrency } = require("../utils/currencyUtils");
 const {
   getPagination,
   createPaginationResponse,
@@ -13,6 +14,9 @@ const {
 // @route   GET /api/customers/by-customer-id/:customerId
 // @access  Public
 const getCustomerByCustomerId = asyncHandler(async (req, res) => {
+  // Get user currency information
+  const currency = await getUserCurrency(req);
+
   const customer = await Customer.findOne({
     customerId: req.params.customerId,
   }).populate("activeLoansCount");
@@ -22,13 +26,19 @@ const getCustomerByCustomerId = asyncHandler(async (req, res) => {
       error: "Customer not found",
     });
   }
-  const loans = await Loan.find({ customer: customer._id }).sort("-createdAt");
+
+  // Get customer's loans but exclude installments
+  const loans = await Loan.find({ customer: customer._id })
+    .select("-installments")
+    .sort("-createdAt");
+
   Logger.info(`Retrieved customer by customerId: ${customer.customerId}`);
   res.status(200).json({
     success: true,
     data: {
       customer,
       loans,
+      currency,
     },
   });
 });
@@ -37,6 +47,9 @@ const getCustomerByCustomerId = asyncHandler(async (req, res) => {
 // @route   GET /api/customers
 // @access  Public
 const getCustomers = asyncHandler(async (req, res) => {
+  // Get user currency information
+  const currency = await getUserCurrency(req);
+
   const { page, limit, skip } = getPagination(req.query);
   // Add customerId to the searchable fields for real-time search
   const searchQuery = buildSearchQuery(req.query, [
@@ -62,6 +75,7 @@ const getCustomers = asyncHandler(async (req, res) => {
     success: true,
     data: customers,
     pagination,
+    currency,
   });
 });
 
@@ -69,6 +83,9 @@ const getCustomers = asyncHandler(async (req, res) => {
 // @route   GET /api/customers/:id
 // @access  Public
 const getCustomer = asyncHandler(async (req, res) => {
+  // Get user currency information
+  const currency = await getUserCurrency(req);
+
   const customer = await Customer.findById(req.params.id).populate(
     "activeLoansCount"
   );
@@ -90,6 +107,7 @@ const getCustomer = asyncHandler(async (req, res) => {
     data: {
       customer,
       loans,
+      currency,
     },
   });
 });
@@ -98,6 +116,9 @@ const getCustomer = asyncHandler(async (req, res) => {
 // @route   POST /api/customers
 // @access  Public
 const createCustomer = asyncHandler(async (req, res) => {
+  // Get user currency information
+  const currency = await getUserCurrency(req);
+
   const customer = await Customer.create(req.body);
 
   Logger.info(`Created new customer: ${customer.fullName}`);
@@ -105,6 +126,7 @@ const createCustomer = asyncHandler(async (req, res) => {
   res.status(201).json({
     success: true,
     data: customer,
+    currency,
   });
 });
 
@@ -112,6 +134,9 @@ const createCustomer = asyncHandler(async (req, res) => {
 // @route   PUT /api/customers/:id
 // @access  Public
 const updateCustomer = asyncHandler(async (req, res) => {
+  // Get user currency information
+  const currency = await getUserCurrency(req);
+
   let customer = await Customer.findById(req.params.id);
 
   if (!customer) {
@@ -131,6 +156,7 @@ const updateCustomer = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     data: customer,
+    currency,
   });
 });
 
@@ -174,6 +200,9 @@ const deleteCustomer = asyncHandler(async (req, res) => {
 // @route   GET /api/customers/stats
 // @access  Public
 const getCustomerStats = asyncHandler(async (req, res) => {
+  // Get user currency information
+  const currency = await getUserCurrency(req);
+
   const totalCustomers = await Customer.countDocuments();
   const activeCustomers = await Customer.countDocuments({ status: "active" });
   const inactiveCustomers = await Customer.countDocuments({
@@ -189,6 +218,7 @@ const getCustomerStats = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     data: stats,
+    currency,
   });
 });
 

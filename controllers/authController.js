@@ -1,12 +1,23 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { getUserCurrency } = require("../utils/currencyUtils");
 
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
 
 exports.register = async (req, res) => {
   try {
-    const { username, password, name, email, language, currency } = req.body;
+    // Get user currency information (will default to USD for new registrations)
+    const currency = await getUserCurrency(req);
+
+    const {
+      username,
+      password,
+      name,
+      email,
+      language,
+      currency: reqCurrency,
+    } = req.body;
     if (!username || !password) {
       return res
         .status(400)
@@ -21,7 +32,7 @@ exports.register = async (req, res) => {
       return res.status(400).json({ message: "Invalid language selection." });
     }
 
-    if (currency && !validCurrencies.includes(currency)) {
+    if (reqCurrency && !validCurrencies.includes(reqCurrency)) {
       return res.status(400).json({ message: "Invalid currency selection." });
     }
 
@@ -44,7 +55,7 @@ exports.register = async (req, res) => {
       username,
       password: hashedPassword,
       language: language || "en", // Default to English
-      currency: currency || "USD", // Default to USD
+      currency: reqCurrency || "USD", // Default to USD
     };
 
     // Add optional fields if provided
@@ -60,6 +71,7 @@ exports.register = async (req, res) => {
     res.status(201).json({
       message: "User registered successfully.",
       user: userResponse,
+      currency,
     });
   } catch (err) {
     console.error("Registration error:", err);

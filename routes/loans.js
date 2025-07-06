@@ -28,54 +28,63 @@ const {
   updateInstallmentSchema,
   bulkPaymentSchema,
 } = require("../middleware/validation");
+const { validateJWT } = require("../middleware/auth");
 
 const router = express.Router();
 
 // Installment statistics and cross-loan routes
-router.get("/installments/overdue", getOverdueInstallments);
-router.get("/installments/upcoming", getUpcomingInstallments);
-router.get("/installments/stats", getInstallmentStats);
+router.get("/installments/overdue", validateJWT, getOverdueInstallments);
+router.get("/installments/upcoming", validateJWT, getUpcomingInstallments);
+router.get("/installments/stats", validateJWT, getInstallmentStats);
 
 // Installment routes for specific loans
-router.get("/:id/installments", getInstallments);
+router.get("/:id/installments", validateJWT, getInstallments);
 router.put(
   "/:id/installments/:installmentNumber",
+  validateJWT,
   validateSchema(updateInstallmentSchema),
   updateInstallment
 );
-router.post("/:id/installments", addInstallment);
+router.post("/:id/installments", validateJWT, addInstallment);
 router.post(
   "/:id/installments/:installmentNumber/payment",
+  validateJWT,
   validateSchema(makeInstallmentPaymentSchema),
   makeInstallmentPayment
 );
 router.post(
   "/:id/installments/bulk-payment",
+  validateJWT,
   validateSchema(bulkPaymentSchema),
   bulkInstallmentPayment
 );
 
 // Loan schedule
-router.get("/:id/schedule", getLoanSchedule);
+router.get("/:id/schedule", validateJWT, getLoanSchedule);
 
 // Loan statistics and special routes
-router.get("/stats", getLoanStats);
-router.get("/overdue", getOverdueLoans);
-router.get("/by-id/:loanId", getLoanByLoanId);
+router.get("/stats", validateJWT, getLoanStats);
+router.get("/overdue", validateJWT, getOverdueLoans);
+router.get("/by-id/:loanId", validateJWT, getLoanByLoanId);
 
 // Payment routes
-router.post("/:id/payments", validateSchema(addPaymentSchema), addPayment);
+router.post(
+  "/:id/payments",
+  validateJWT,
+  validateSchema(addPaymentSchema),
+  addPayment
+);
 
 // Loan CRUD operations
 router
   .route("/")
-  .get(getLoans)
-  .post(validateSchema(createLoanSchema), createLoan);
+  .get(validateJWT, getLoans)
+  .post(validateJWT, validateSchema(createLoanSchema), createLoan);
 
 router
   .route("/:id")
-  .get(getLoan)
-  .put(validateSchema(updateLoanSchema), updateLoan)
-  .delete(deleteLoan);
+  .get(validateJWT, getLoan)
+  .put(validateJWT, validateSchema(updateLoanSchema), updateLoan)
+  .delete(validateJWT, deleteLoan);
 
 module.exports = router;

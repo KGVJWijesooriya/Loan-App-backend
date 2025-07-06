@@ -2,6 +2,7 @@ const asyncHandler = require("../middleware/asyncHandler");
 const Loan = require("../models/Loan");
 const Customer = require("../models/Customer");
 const Logger = require("../utils/logger");
+const { getUserCurrency } = require("../utils/currencyUtils");
 const mongoose = require("mongoose");
 const {
   getPagination,
@@ -15,6 +16,9 @@ const { addDays, calculateLoanDuration } = require("../utils/dateUtils");
 // @route   GET /api/loans
 // @access  Public
 const getLoans = asyncHandler(async (req, res) => {
+  // Get user currency information
+  const currency = await getUserCurrency(req);
+
   const { page, limit, skip } = getPagination(req.query);
   const searchQuery = buildSearchQuery(req.query);
   const sortQuery = buildSortQuery(req.query);
@@ -81,6 +85,7 @@ const getLoans = asyncHandler(async (req, res) => {
     success: true,
     data: filteredLoans,
     pagination,
+    currency,
   });
 });
 // });
@@ -89,6 +94,9 @@ const getLoans = asyncHandler(async (req, res) => {
 // @route   GET /api/loans/:id
 // @access  Public
 const getLoan = asyncHandler(async (req, res) => {
+  // Get user currency information
+  const currency = await getUserCurrency(req);
+
   const loan = await Loan.findById(req.params.id).populate("customer").lean();
 
   if (!loan) {
@@ -138,6 +146,7 @@ const getLoan = asyncHandler(async (req, res) => {
       completionPercentage,
       installmentAmount,
       interestAmount,
+      currency,
     },
   });
 });
@@ -148,6 +157,9 @@ const getLoan = asyncHandler(async (req, res) => {
 // @route   GET /api/loans/:id/installments
 // @access  Public
 const getInstallments = asyncHandler(async (req, res) => {
+  // Get user currency information
+  const currency = await getUserCurrency(req);
+
   const {
     page = 1,
     limit = 50,
@@ -227,6 +239,7 @@ const getInstallments = asyncHandler(async (req, res) => {
       totalInstallments: loan.installments.length,
       installments: paginatedInstallments,
       summary,
+      currency,
     },
     pagination: {
       currentPage: parseInt(page),
@@ -239,6 +252,9 @@ const getInstallments = asyncHandler(async (req, res) => {
 });
 
 const createLoan = asyncHandler(async (req, res) => {
+  // Get user currency information
+  const currency = await getUserCurrency(req);
+
   // Extract and validate fields
   const {
     customer,
@@ -313,7 +329,7 @@ const createLoan = asyncHandler(async (req, res) => {
 
   res.status(201).json({
     success: true,
-    data: { ...loan.toObject(), nextInstallmentDates },
+    data: { ...loan.toObject(), nextInstallmentDates, currency },
   });
 });
 
@@ -321,6 +337,9 @@ const createLoan = asyncHandler(async (req, res) => {
 // @route   PUT /api/loans/:id
 // @access  Public
 const updateLoan = asyncHandler(async (req, res) => {
+  // Get user currency information
+  const currency = await getUserCurrency(req);
+
   let loan = await Loan.findById(req.params.id);
 
   if (!loan) {
@@ -405,6 +424,7 @@ const updateLoan = asyncHandler(async (req, res) => {
     data: {
       ...loanWithoutInstallments,
       interestAmount,
+      currency,
     },
   });
 });
@@ -436,6 +456,9 @@ const deleteLoan = asyncHandler(async (req, res) => {
 // @route   POST /api/loans/:id/payments
 // @access  Public
 const addPayment = asyncHandler(async (req, res) => {
+  // Get user currency information
+  const currency = await getUserCurrency(req);
+
   const loan = await Loan.findById(req.params.id).populate(
     "customer",
     "fullName nic phone"
@@ -475,6 +498,7 @@ const addPayment = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     data: loan,
+    currency,
   });
 });
 
@@ -482,6 +506,9 @@ const addPayment = asyncHandler(async (req, res) => {
 // @route   GET /api/loans/stats
 // @access  Public
 const getLoanStats = asyncHandler(async (req, res) => {
+  // Get user currency information
+  const currency = await getUserCurrency(req);
+
   const totalLoans = await Loan.countDocuments();
   const activeLoans = await Loan.countDocuments({ status: "active" });
   const completedLoans = await Loan.countDocuments({ status: "completed" });
@@ -509,6 +536,7 @@ const getLoanStats = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     data: stats,
+    currency,
   });
 });
 
@@ -516,6 +544,9 @@ const getLoanStats = asyncHandler(async (req, res) => {
 // @route   GET /api/loans/overdue
 // @access  Public
 const getOverdueLoans = asyncHandler(async (req, res) => {
+  // Get user currency information
+  const currency = await getUserCurrency(req);
+
   const { page, limit, skip } = getPagination(req.query);
 
   const overdueLoans = await Loan.find({
@@ -548,6 +579,7 @@ const getOverdueLoans = asyncHandler(async (req, res) => {
     success: true,
     data: overdueLoans,
     pagination,
+    currency,
   });
 });
 

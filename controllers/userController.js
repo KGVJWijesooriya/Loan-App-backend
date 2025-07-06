@@ -1,10 +1,14 @@
 const User = require("../models/User");
+const { getUserCurrency } = require("../utils/currencyUtils");
 const fs = require("fs");
 const path = require("path");
 
 // Get available languages and currencies
 exports.getPreferences = async (req, res) => {
   try {
+    // Get user currency information
+    const currency = await getUserCurrency(req);
+
     const preferences = {
       languages: [
         { code: "en", name: "English" },
@@ -15,7 +19,7 @@ exports.getPreferences = async (req, res) => {
         { code: "LKR", name: "Sri Lankan Rupee", symbol: "Rs" },
       ],
     };
-    res.json(preferences);
+    res.json({ ...preferences, currency });
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }

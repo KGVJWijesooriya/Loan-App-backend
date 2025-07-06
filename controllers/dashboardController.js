@@ -4,12 +4,16 @@ const Loan = require("../models/Loan");
 const User = require("../models/User");
 const Logger = require("../utils/logger");
 const { getDateRange } = require("../utils/dateUtils");
+const { getUserCurrency } = require("../utils/currencyUtils");
 
 // @desc    Get dashboard overview statistics
 // @route   GET /api/dashboard/overview
 // @access  Private (requires authentication)
 const getDashboardOverview = asyncHandler(async (req, res) => {
   try {
+    // Get user currency information
+    const currency = await getUserCurrency(req);
+
     // Get current date for comparisons
     const now = new Date();
     const todayStart = new Date(
@@ -140,6 +144,7 @@ const getDashboardOverview = asyncHandler(async (req, res) => {
           paymentMethods: paymentMethodStats,
           loanStatus: loanStatusStats,
         },
+        currency,
         lastUpdated: new Date().toISOString(),
       },
     });
@@ -157,6 +162,9 @@ const getDashboardOverview = asyncHandler(async (req, res) => {
 // @access  Private
 const getRecentActivities = asyncHandler(async (req, res) => {
   try {
+    // Get user currency information
+    const currency = await getUserCurrency(req);
+
     const limit = parseInt(req.query.limit) || 10;
 
     // Get recent loan applications
@@ -213,6 +221,7 @@ const getRecentActivities = asyncHandler(async (req, res) => {
         recentLoans,
         recentCustomers,
         recentRepayments,
+        currency,
       },
     });
   } catch (error) {
@@ -232,9 +241,8 @@ const getFinancialAnalytics = asyncHandler(async (req, res) => {
   try {
     const { period = "7d" } = req.query;
 
-    // Get user currency from authenticated user
-    const user = await User.findById(req.user.id).select("currency");
-    const userCurrency = user?.currency || "USD";
+    // Get user currency information
+    const currency = await getUserCurrency(req);
 
     // Get date range based on period
     const dateRange = getDateRange(period);
@@ -327,7 +335,7 @@ const getFinancialAnalytics = asyncHandler(async (req, res) => {
         riskAnalysis,
         period,
         dateRange,
-        currency: userCurrency,
+        currency,
       },
     });
   } catch (error) {
@@ -344,6 +352,9 @@ const getFinancialAnalytics = asyncHandler(async (req, res) => {
 // @access  Private
 const getTopCustomers = asyncHandler(async (req, res) => {
   try {
+    // Get user currency information
+    const currency = await getUserCurrency(req);
+
     const limit = parseInt(req.query.limit) || 10;
     const sortBy = req.query.sortBy || "totalBorrowed"; // totalBorrowed, totalRepaid, loanCount
 
@@ -421,6 +432,7 @@ const getTopCustomers = asyncHandler(async (req, res) => {
         customers: topCustomers,
         sortBy,
         total: topCustomers.length,
+        currency,
       },
     });
   } catch (error) {
@@ -437,6 +449,9 @@ const getTopCustomers = asyncHandler(async (req, res) => {
 // @access  Private
 const getCollectionSummary = asyncHandler(async (req, res) => {
   try {
+    // Get user currency information
+    const currency = await getUserCurrency(req);
+
     const today = new Date();
     const todayStart = new Date(
       today.getFullYear(),
@@ -532,6 +547,7 @@ const getCollectionSummary = asyncHandler(async (req, res) => {
           amount: overdueCollections[0]?.totalOverdue || 0,
           count: overdueCollections[0]?.count || 0,
         },
+        currency,
       },
     });
   } catch (error) {

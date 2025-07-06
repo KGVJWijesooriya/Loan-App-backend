@@ -3,6 +3,7 @@ const Customer = require("../models/Customer");
 const Loan = require("../models/Loan");
 const User = require("../models/User");
 const Logger = require("../utils/logger");
+const { getUserCurrency } = require("../utils/currencyUtils");
 const { getDateRange } = require("../utils/dateUtils");
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
