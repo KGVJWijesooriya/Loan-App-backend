@@ -18,6 +18,7 @@ describe("User Preferences API", () => {
       email: "test@example.com",
       language: "en",
       currency: "USD",
+      theme: "light",
     });
     await testUser.save();
   });
@@ -37,6 +38,7 @@ describe("User Preferences API", () => {
       expect(response.body.message).toMatch(/updated successfully/i);
       expect(response.body.data.language).toBe("si");
       expect(response.body.data.currency).toBe("USD"); // Should remain unchanged
+      expect(response.body.data.theme).toBe("light"); // Should remain unchanged
       expect(response.body.data.userId).toBe(testUser.userId);
     });
 
@@ -53,6 +55,7 @@ describe("User Preferences API", () => {
       expect(response.body.success).toBe(true);
       expect(response.body.data.currency).toBe("LKR");
       expect(response.body.data.language).toBe("en"); // Should remain unchanged
+      expect(response.body.data.theme).toBe("light"); // Should remain unchanged
     });
 
     it("should update both language and currency", async () => {
@@ -69,6 +72,41 @@ describe("User Preferences API", () => {
       expect(response.body.success).toBe(true);
       expect(response.body.data.language).toBe("si");
       expect(response.body.data.currency).toBe("LKR");
+      expect(response.body.data.theme).toBe("light"); // Should remain unchanged
+    });
+
+    it("should update user theme preference", async () => {
+      const updateData = {
+        theme: "dark",
+      };
+
+      const response = await request(app)
+        .patch(`/api/users/${testUser.userId}/preferences`)
+        .send(updateData)
+        .expect(200);
+
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.theme).toBe("dark");
+      expect(response.body.data.language).toBe("en"); // Should remain unchanged
+      expect(response.body.data.currency).toBe("USD"); // Should remain unchanged
+    });
+
+    it("should update all preferences together", async () => {
+      const updateData = {
+        language: "si",
+        currency: "LKR",
+        theme: "dark",
+      };
+
+      const response = await request(app)
+        .patch(`/api/users/${testUser.userId}/preferences`)
+        .send(updateData)
+        .expect(200);
+
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.language).toBe("si");
+      expect(response.body.data.currency).toBe("LKR");
+      expect(response.body.data.theme).toBe("dark");
     });
 
     it("should reject invalid language", async () => {
@@ -99,6 +137,20 @@ describe("User Preferences API", () => {
       expect(response.body.message).toMatch(/invalid currency/i);
     });
 
+    it("should reject invalid theme", async () => {
+      const updateData = {
+        theme: "blue",
+      };
+
+      const response = await request(app)
+        .patch(`/api/users/${testUser.userId}/preferences`)
+        .send(updateData)
+        .expect(400);
+
+      expect(response.body.success).toBe(false);
+      expect(response.body.message).toMatch(/invalid theme/i);
+    });
+
     it("should reject empty update data", async () => {
       const response = await request(app)
         .patch(`/api/users/${testUser.userId}/preferences`)
@@ -106,7 +158,9 @@ describe("User Preferences API", () => {
         .expect(400);
 
       expect(response.body.success).toBe(false);
-      expect(response.body.message).toMatch(/provide language or currency/i);
+      expect(response.body.message).toMatch(
+        /provide language, currency, or theme/i
+      );
     });
 
     it("should return 404 for non-existent user", async () => {
@@ -132,8 +186,10 @@ describe("User Preferences API", () => {
 
       expect(response.body.languages).toBeDefined();
       expect(response.body.currencies).toBeDefined();
+      expect(response.body.themes).toBeDefined();
       expect(response.body.languages).toHaveLength(2);
       expect(response.body.currencies).toHaveLength(2);
+      expect(response.body.themes).toHaveLength(2);
 
       // Check language options
       expect(response.body.languages).toEqual(
@@ -148,6 +204,14 @@ describe("User Preferences API", () => {
         expect.arrayContaining([
           { code: "USD", name: "US Dollar", symbol: "$" },
           { code: "LKR", name: "Sri Lankan Rupee", symbol: "Rs" },
+        ])
+      );
+
+      // Check theme options
+      expect(response.body.themes).toEqual(
+        expect.arrayContaining([
+          { code: "light", name: "Light Theme" },
+          { code: "dark", name: "Dark Theme" },
         ])
       );
     });

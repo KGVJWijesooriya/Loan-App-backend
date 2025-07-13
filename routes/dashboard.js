@@ -6,6 +6,8 @@ const {
   getFinancialAnalytics,
   getTopCustomers,
   getCollectionSummary,
+  getOverdueLoans,
+  getServerTime,
 } = require("../controllers/dashboardController");
 
 // Import authentication middleware
@@ -35,5 +37,15 @@ router.get("/top-customers", validateJWT, getTopCustomers);
 // @route   GET /api/dashboard/collection-summary
 // @access  Private
 router.get("/collection-summary", validateJWT, getCollectionSummary);
+
+// @desc    Get overdue loans list with pagination
+// @route   GET /api/dashboard/overdue-loans
+// @access  Private
+router.get("/overdue-loans", validateJWT, getOverdueLoans);
+
+// @desc    Get server time info for debugging
+// @route   GET /api/dashboard/server-time
+// @access  Private
+router.get("/server-time", validateJWT, getServerTime);
 
 module.exports = router;

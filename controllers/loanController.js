@@ -759,7 +759,7 @@ const getLoanSchedule = asyncHandler(async (req, res) => {
 // @route   POST /api/loans/:id/installments/:installmentNumber/payment
 // @access  Public
 const makeInstallmentPayment = asyncHandler(async (req, res) => {
-  const { amount, method = "cash", notes = "" } = req.body;
+  const { amount, method = "cash", notes = "", paidDate } = req.body;
   const { id, installmentNumber } = req.params;
 
   if (!amount || amount <= 0) {
@@ -779,7 +779,12 @@ const makeInstallmentPayment = asyncHandler(async (req, res) => {
   }
 
   try {
-    await loan.makePayment(parseInt(installmentNumber), amount, notes);
+    await loan.makePayment(
+      parseInt(installmentNumber),
+      amount,
+      notes,
+      paidDate
+    );
 
     // Get updated installment
     const updatedInstallment = loan.installments.find(
@@ -825,6 +830,7 @@ const bulkInstallmentPayment = asyncHandler(async (req, res) => {
     method = "cash",
     notes = "",
     startFromInstallment,
+    paidDate,
   } = req.body;
   const { id } = req.params;
 
@@ -874,7 +880,12 @@ const bulkInstallmentPayment = asyncHandler(async (req, res) => {
     const paymentAmount = Math.min(remainingAmount, amountDue);
 
     try {
-      await loan.makePayment(i, paymentAmount, `${notes} (Bulk payment)`);
+      await loan.makePayment(
+        i,
+        paymentAmount,
+        `${notes} (Bulk payment)`,
+        paidDate
+      );
 
       paymentsApplied.push({
         installmentNumber: i,
@@ -1241,7 +1252,24 @@ const updateInstallment = asyncHandler(async (req, res) => {
     installment.paidAmount = paidAmount;
   }
   if (paidDate !== undefined) {
-    installment.paidDate = new Date(paidDate);
+    // Save paidDate as provided if it's an ISO string with timezone info (Z or +hh:mm), otherwise treat as Sri Lanka local time and convert to UTC
+    const moment = require("moment-timezone");
+    const SRI_LANKA_TIMEZONE = "Asia/Colombo";
+    if (
+      typeof paidDate === "string" &&
+      (paidDate.endsWith("Z") || /[+-]\d{2}:\d{2}$/.test(paidDate))
+    ) {
+      // ISO string with timezone info, save as-is
+      installment.paidDate = new Date(paidDate);
+    } else {
+      // Treat as Sri Lanka local time string, convert to UTC
+      const m = moment.tz(
+        paidDate,
+        [moment.ISO_8601, "YYYY-MM-DD HH:mm:ss"],
+        SRI_LANKA_TIMEZONE
+      );
+      installment.paidDate = m.isValid() ? m.toDate() : new Date(paidDate);
+    }
   }
 
   await loan.save();

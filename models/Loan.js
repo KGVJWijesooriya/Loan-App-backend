@@ -192,7 +192,8 @@ loanSchema.virtual("paidInstallmentsCount").get(function () {
 loanSchema.methods.makePayment = function (
   installmentNumber,
   amount,
-  notes = ""
+  notes = "",
+  paidDate = null
 ) {
   const installment = this.installments.find(
     (inst) => inst.installmentNumber === installmentNumber
@@ -220,14 +221,14 @@ loanSchema.methods.makePayment = function (
   // Update installment status based on payment
   if (installment.paidAmount >= installment.installmentAmount) {
     installment.status = "paid";
-    installment.paidDate = new Date();
+    installment.paidDate = paidDate ? new Date(paidDate) : new Date();
   } else if (installment.paidAmount > 0) {
     installment.status = "partial";
   }
 
   // Add to payment history
   this.paymentHistory.push({
-    date: new Date(),
+    date: paidDate ? new Date(paidDate) : new Date(),
     amount: amount,
     method: "cash", // default, can be updated
     notes: `Payment for installment ${installmentNumber}. ${notes}`,

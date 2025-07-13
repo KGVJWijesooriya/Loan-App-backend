@@ -22,6 +22,26 @@ exports.getPreferences = async (req, res) => {
         { code: "light", name: "Light Theme" },
         { code: "dark", name: "Dark Theme" },
       ],
+    };"../models/User");
+const { getUserCurrency } = require("../utils/currencyUtils");
+const fs = require("fs");
+const path = require("path");
+
+// Get available languages and currencies
+exports.getPreferences = async (req, res) => {
+  try {
+    // Get user currency information
+    const currency = await getUserCurrency(req);
+
+    const preferences = {
+      languages: [
+        { code: "en", name: "English" },
+        { code: "si", name: "සිංහල" },
+      ],
+      currencies: [
+        { code: "USD", name: "US Dollar", symbol: "$" },
+        { code: "LKR", name: "Sri Lankan Rupee", symbol: "Rs" },
+      ],
     };
     res.json({ ...preferences, currency });
   } catch (err) {
@@ -47,7 +67,7 @@ exports.editUser = async (req, res) => {
   try {
     const updateData = { ...req.body };
 
-    // Validate language, currency, and theme if provided
+    // Validate language and currency if provided
     const validLanguages = ["en", "si"];
     const validCurrencies = ["USD", "LKR"];
     const validThemes = ["light", "dark"];

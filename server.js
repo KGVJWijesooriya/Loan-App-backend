@@ -7,6 +7,13 @@ const Logger = require("./utils/logger");
 const cron = require("node-cron");
 const Loan = require("./models/Loan");
 const cors = require("cors");
+const {
+  setSriLankaTimezone,
+  getSriLankaDate,
+} = require("./utils/timezoneUtils");
+
+// Set Sri Lanka timezone for the entire application
+setSriLankaTimezone();
 
 // Handle uncaught exceptions
 process.on("uncaughtException", (err) => {
@@ -28,31 +35,40 @@ server.on("request", app);
 
 // ...CORS is handled in app.js...
 
-// Scheduled job to update overdue loans
-cron.schedule("0 0 * * *", async () => {
-  // Run daily at midnight
-  try {
-    Logger.info("Running scheduled job to update overdue loans...");
-    const result = await Loan.updateMany(
-      {
-        status: "active",
-        dueDate: { $lt: new Date() },
-      },
-      {
-        $set: {
-          status: "overdue",
-          timestamp: new Date(),
+// Scheduled job to update overdue loans - runs at midnight Sri Lanka time
+cron.schedule(
+  "0 0 * * *",
+  async () => {
+    // Run daily at midnight Sri Lanka time
+    try {
+      const sriLankaTime = getSriLankaDate();
+      Logger.info(
+        `Running scheduled job to update overdue loans at ${sriLankaTime.toISOString()}...`
+      );
+      const result = await Loan.updateMany(
+        {
+          status: "active",
+          dueDate: { $lt: sriLankaTime },
         },
+        {
+          $set: {
+            status: "overdue",
+            timestamp: sriLankaTime,
+          },
+        }
+      );
+      if (result.modifiedCount > 0) {
+        Logger.info(`Updated ${result.modifiedCount} loans to overdue status`);
+        // WebSocket removed: previously emitted "overdue-loans-updated"
       }
-    );
-    if (result.modifiedCount > 0) {
-      Logger.info(`Updated ${result.modifiedCount} loans to overdue status`);
-      // WebSocket removed: previously emitted "overdue-loans-updated"
+    } catch (error) {
+      Logger.error("Error in scheduled overdue loan update:", error);
     }
-  } catch (error) {
-    Logger.error("Error in scheduled overdue loan update:", error);
+  },
+  {
+    timezone: "Asia/Colombo",
   }
-});
+);
 
 // Start server
 const PORT = config.PORT;

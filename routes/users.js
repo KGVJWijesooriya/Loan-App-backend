@@ -16,8 +16,8 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Get available languages and currencies
-router.get("/preferences/options", validateJWT, userController.getPreferences);
+// Get available languages and currencies (no authentication required)
+router.get("/preferences/options", userController.getPreferences);
 
 // Update user language and currency preferences
 router.put("/:id/preferences", validateJWT, userController.updatePreferences);

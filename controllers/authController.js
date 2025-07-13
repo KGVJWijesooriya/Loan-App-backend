@@ -17,6 +17,7 @@ exports.register = async (req, res) => {
       email,
       language,
       currency: reqCurrency,
+      theme,
     } = req.body;
     if (!username || !password) {
       return res
@@ -24,9 +25,10 @@ exports.register = async (req, res) => {
         .json({ message: "Username and password are required." });
     }
 
-    // Validate language and currency if provided
+    // Validate language, currency, and theme if provided
     const validLanguages = ["en", "si"];
     const validCurrencies = ["USD", "LKR"];
+    const validThemes = ["light", "dark"];
 
     if (language && !validLanguages.includes(language)) {
       return res.status(400).json({ message: "Invalid language selection." });
@@ -34,6 +36,10 @@ exports.register = async (req, res) => {
 
     if (reqCurrency && !validCurrencies.includes(reqCurrency)) {
       return res.status(400).json({ message: "Invalid currency selection." });
+    }
+
+    if (theme && !validThemes.includes(theme)) {
+      return res.status(400).json({ message: "Invalid theme selection." });
     }
 
     const existingUser = await User.findOne({ username });
@@ -56,6 +62,7 @@ exports.register = async (req, res) => {
       password: hashedPassword,
       language: language || "en", // Default to English
       currency: reqCurrency || "USD", // Default to USD
+      theme: theme || "light", // Default to light theme
     };
 
     // Add optional fields if provided
@@ -111,5 +118,33 @@ exports.login = async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ message: "Server error." });
+  }
+};
+
+exports.logout = async (req, res) => {
+  try {
+    // Since we're using stateless JWT tokens, logout is handled on the client side
+    // The client should remove the token from storage (localStorage, sessionStorage, etc.)
+
+    // Optional: Log the logout action for audit purposes
+    if (req.user) {
+      console.log(
+        `User ${req.user.username} (ID: ${
+          req.user.userId
+        }) logged out at ${new Date().toISOString()}`
+      );
+    }
+
+    res.status(200).json({
+      success: true,
+      message:
+        "Logged out successfully. Please remove the token from client storage.",
+    });
+  } catch (err) {
+    console.error("Logout error:", err);
+    res.status(500).json({
+      message: "Server error during logout.",
+      error: process.env.NODE_ENV === "development" ? err.message : undefined,
+    });
   }
 };

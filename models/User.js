@@ -41,6 +41,12 @@ const userSchema = new mongoose.Schema({
     default: "USD",
     enum: ["USD", "LKR"], // USD and Sri Lankan Rupee only
   },
+  theme: {
+    type: String,
+    required: true,
+    default: "light",
+    enum: ["light", "dark"], // Light and Dark themes only
+  },
   createdAt: {
     type: Date,
     default: Date.now,

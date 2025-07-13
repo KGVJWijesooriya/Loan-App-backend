@@ -14,6 +14,7 @@ const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/users");
 const dashboardRoutes = require("./routes/dashboard");
 const reportsRoutes = require("./routes/reports");
+const dashboardTodayPaidInstallmentsRoutes = require("./routes/dashboard-today-paid-installments");
 
 const createApp = () => {
   const app = express();
@@ -95,6 +96,7 @@ const createApp = () => {
   app.use("/api/users", userRoutes);
   app.use("/api/dashboard", dashboardRoutes);
   app.use("/api/reports", reportsRoutes);
+  app.use("/api/dashboard", dashboardTodayPaidInstallmentsRoutes);
 
   // Serve static files
   app.use("/uploads/profileImages", express.static("uploads/profileImages"));

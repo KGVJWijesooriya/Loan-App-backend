@@ -1,103 +1,74 @@
+const {
+  getSriLankaTime,
+  getSriLankaStartOfDay,
+  getSriLankaEndOfDay,
+  getSriLankaDateRange,
+  toSriLankaTime,
+  addDaysInSriLanka,
+  daysBetweenInSriLanka,
+  formatSriLankaDate,
+} = require("./timezoneUtils");
+
 /**
- * Format date to YYYY-MM-DD
+ * Format date to YYYY-MM-DD using Sri Lanka timezone
  * @param {Date} date
  * @returns {string}
  */
 const formatDate = (date) => {
   if (!date) return null;
-  return new Date(date).toISOString().split("T")[0];
+  return formatSriLankaDate(date, "YYYY-MM-DD");
 };
 
 /**
- * Calculate days between two dates
+ * Calculate days between two dates using Sri Lanka timezone
  * @param {Date} startDate
  * @param {Date} endDate
  * @returns {number}
  */
 const daysBetween = (startDate, endDate) => {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  const diffTime = Math.abs(end - start);
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return Math.abs(daysBetweenInSriLanka(startDate, endDate));
 };
 
 /**
- * Add days to a date
+ * Add days to a date using Sri Lanka timezone
  * @param {Date} date
  * @param {number} days
  * @returns {Date}
  */
 const addDays = (date, days) => {
-  const result = new Date(date);
-  result.setDate(result.getDate() + days);
-  return result;
+  return addDaysInSriLanka(date, days);
 };
 
 /**
- * Check if date is overdue
+ * Check if date is overdue using Sri Lanka timezone
  * @param {Date} dueDate
  * @returns {boolean}
  */
 const isOverdue = (dueDate) => {
-  return new Date() > new Date(dueDate);
+  const now = getSriLankaTime();
+  const due = toSriLankaTime(dueDate);
+  return now.isAfter(due);
 };
 
 /**
- * Get start and end of day
+ * Get start and end of day using Sri Lanka timezone
  * @param {Date} date
  * @returns {object}
  */
 const getDateRangeForDay = (date) => {
-  const start = new Date(date);
-  start.setHours(0, 0, 0, 0);
-
-  const end = new Date(date);
-  end.setHours(23, 59, 59, 999);
-
-  return { start, end };
+  return {
+    start: getSriLankaStartOfDay(date),
+    end: getSriLankaEndOfDay(date),
+  };
 };
 
 /**
- * Get date range based on period string
+ * Get date range based on period string using Sri Lanka timezone
  * @param {string} period - Period string like "7d", "30d", "3m", "1y"
  * @returns {object}
  */
 const getDateRange = (period) => {
-  const now = new Date();
-  const end = new Date(now);
-  const start = new Date(now);
-
-  // Parse period string
-  const periodRegex = /^(\d+)([dmy])$/;
-  const match = period.match(periodRegex);
-
-  if (!match) {
-    // Default to 7 days if invalid period
-    start.setDate(start.getDate() - 7);
-  } else {
-    const [, value, unit] = match;
-    const numValue = parseInt(value);
-
-    switch (unit) {
-      case "d":
-        start.setDate(start.getDate() - numValue);
-        break;
-      case "m":
-        start.setMonth(start.getMonth() - numValue);
-        break;
-      case "y":
-        start.setFullYear(start.getFullYear() - numValue);
-        break;
-      default:
-        start.setDate(start.getDate() - 7);
-    }
-  }
-
-  // Set to start and end of day
-  start.setHours(0, 0, 0, 0);
-  end.setHours(23, 59, 59, 999);
-
-  return { start, end };
+  return getSriLankaDateRange(period);
 };
 
 /**

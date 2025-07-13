@@ -107,4 +107,54 @@ describe("Auth Endpoints", () => {
       expect(response.body.message).toMatch(/invalid/i);
     });
   });
+
+  describe("POST /api/auth/logout", () => {
+    let authToken;
+
+    beforeEach(async () => {
+      // Create a user and get auth token
+      const userData = {
+        username: "logoutuser",
+        password: "logoutpass123",
+      };
+
+      await User.create({
+        username: userData.username,
+        password: await require("bcrypt").hash(userData.password, 10),
+      });
+
+      const loginResponse = await request(app)
+        .post("/api/auth/login")
+        .send(userData);
+
+      authToken = loginResponse.body.token;
+    });
+
+    it("should logout successfully with valid token", async () => {
+      const response = await request(app)
+        .post("/api/auth/logout")
+        .set("Authorization", `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(response.body.success).toBe(true);
+      expect(response.body.message).toMatch(/logged out successfully/i);
+    });
+
+    it("should reject logout without token", async () => {
+      const response = await request(app).post("/api/auth/logout").expect(401);
+
+      expect(response.body.success).toBe(false);
+      expect(response.body.error).toMatch(/no token provided/i);
+    });
+
+    it("should reject logout with invalid token", async () => {
+      const response = await request(app)
+        .post("/api/auth/logout")
+        .set("Authorization", "Bearer invalid_token")
+        .expect(401);
+
+      expect(response.body.success).toBe(false);
+      expect(response.body.error).toMatch(/invalid token/i);
+    });
+  });
 });
