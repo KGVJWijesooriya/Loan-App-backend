@@ -8,14 +8,33 @@ const createCustomerSchema = Joi.object({
     .trim()
     .uppercase()
     .pattern(/^\d{9}[VX]$|^\d{12}$/),
-  phone: Joi.string()
-    .required()
+  // Accept either phone or primaryPhone
+  phone: Joi.alternatives().try(
+    Joi.string()
+      .required()
+      .trim()
+      .pattern(/^\+?[\d\s-()]{10,15}$/),
+    Joi.any().forbidden()
+  ),
+  primaryPhone: Joi.string()
     .trim()
     .pattern(/^\+?[\d\s-()]{10,15}$/),
   address: Joi.string().optional().trim().max(500),
   email: Joi.string().optional().trim().email(),
   status: Joi.string().valid("active", "inactive").default("active"),
   customerId: Joi.string().optional(),
+  // Accept either address or homeAddress
+  homeAddress: Joi.string().optional().trim().max(500),
+  // Allow additional fields
+  dateOfBirth: Joi.string().optional(),
+  gender: Joi.string().optional(),
+  mainIncome: Joi.string().optional(),
+  otherIncome: Joi.string().optional(),
+  secondaryPhone: Joi.string().optional(),
+  workAddress: Joi.string().optional(),
+  drivingLicense: Joi.string().optional(),
+  nameWithInitials: Joi.string().optional(),
+  shortName: Joi.string().optional(),
 });
 
 const updateCustomerSchema = Joi.object({

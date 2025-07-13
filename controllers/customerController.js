@@ -119,7 +119,14 @@ const createCustomer = asyncHandler(async (req, res) => {
   // Get user currency information
   const currency = await getUserCurrency(req);
 
-  const customer = await Customer.create(req.body);
+  // Merge all payload fields, but ensure required schema fields are mapped
+  const mappedData = {
+    ...req.body,
+    phone: req.body.primaryPhone || req.body.phone,
+    address: req.body.homeAddress || req.body.address,
+  };
+
+  const customer = await Customer.create(mappedData);
 
   Logger.info(`Created new customer: ${customer.fullName}`);
 

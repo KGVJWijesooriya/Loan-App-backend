@@ -8,6 +8,29 @@ const customerSchema = new mongoose.Schema(
       trim: true,
       maxlength: [100, "Full name cannot exceed 100 characters"],
     },
+    nameWithInitials: {
+      type: String,
+      trim: true,
+      maxlength: [100, "Name with initials cannot exceed 100 characters"],
+    },
+    shortName: {
+      type: String,
+      trim: true,
+      maxlength: [100, "Short name cannot exceed 100 characters"],
+    },
+    dateOfBirth: {
+      type: String,
+      trim: true,
+    },
+    gender: {
+      type: String,
+      enum: ["male", "female", "other"],
+      trim: true,
+    },
+    drivingLicense: {
+      type: String,
+      trim: true,
+    },
     nic: {
       type: String,
       required: [true, "NIC is required"],
@@ -22,10 +45,36 @@ const customerSchema = new mongoose.Schema(
       trim: true,
       match: [/^\+?[\d\s-()]{10,15}$/, "Please provide a valid phone number"],
     },
+    primaryPhone: {
+      type: String,
+      trim: true,
+    },
+    secondaryPhone: {
+      type: String,
+      trim: true,
+    },
     address: {
       type: String,
       trim: true,
       maxlength: [500, "Address cannot exceed 500 characters"],
+    },
+    homeAddress: {
+      type: String,
+      trim: true,
+      maxlength: [500, "Home address cannot exceed 500 characters"],
+    },
+    workAddress: {
+      type: String,
+      trim: true,
+      maxlength: [500, "Work address cannot exceed 500 characters"],
+    },
+    mainIncome: {
+      type: String,
+      trim: true,
+    },
+    otherIncome: {
+      type: String,
+      trim: true,
     },
     email: {
       type: String,
@@ -57,7 +106,11 @@ const customerSchema = new mongoose.Schema(
 customerSchema.pre("save", async function (next) {
   if (this.isNew && !this.customerId) {
     // Find the customer with the highest customerId number
-    const last = await this.constructor.findOne({ customerId: /^CUS-\d{4}$/ }, {}, { sort: { customerId: -1 } });
+    const last = await this.constructor.findOne(
+      { customerId: /^CUS-\d{4}$/ },
+      {},
+      { sort: { customerId: -1 } }
+    );
     let nextNumber = 1;
     if (last && last.customerId) {
       const match = last.customerId.match(/CUS-(\d{4})/);
